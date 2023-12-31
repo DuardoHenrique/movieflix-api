@@ -81,7 +81,7 @@ app.put("/movies/:id", async (req, res) => {
             data
         });
     } catch (error) {
-        return res.status(500).send({message: "Falha ao atualizar o registro do filme"})
+        return res.status(500).send({message: "Falha ao atualizar o registro do filme"});
     }
     
     // retornar o status correto informado que o filme foi atualizado
@@ -105,6 +105,30 @@ app.delete("/movies/:id", async (req, res) => {
     }
 
     res.status(200).send();
+});
+
+app.get("/movies/:genreName", async (req, res) => {
+    // filtrar os filmes do banco pelo gênero
+    try {
+        const moviesFilteredByGenreName = await prisma.movie.findMany({
+            include: {
+                genres: true,
+                languages: true
+            },
+            where: {
+                genres: { 
+                    name: {
+                        equals: req.params.genreName,
+                        mode: "insensitive"
+                    }
+                }
+            }
+        });
+
+        res.status(200).send(moviesFilteredByGenreName);
+    } catch (error) {
+        res.status(500).send({message: "Falha ao filtrar filmes por gênero"});
+    }
 });
 
 app.listen(port, () => {
